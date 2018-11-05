@@ -13,5 +13,5 @@ import "github.com/collierconsulting/hydros-api-go"
 
 Intializing the client
 ```go
-client, err := NewHydrosClient(SetHost("https://the.apihost.com"), SetAccessToken("[your access token]"))
+client, err := hydros.NewHydrosClient(hydros.SetHost("https://the.apihost.com"), hydros.SetAccessToken("[your access token]"))
 ```
