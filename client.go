@@ -9,7 +9,7 @@ import (
 
 const (
 	// DefaultURL default URL
-	DefaultURL      = "https://localhost"
+	DefaultURL = "https://localhost"
 	// DefaultAuthType default authentication type
 	DefaultAuthType = AuthTypeOpenID
 )
