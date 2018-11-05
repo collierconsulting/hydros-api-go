@@ -48,9 +48,10 @@ func (service *DefaultDrillerService) Init(spec *ServiceSpec) *DefaultDrillerSer
 	service.GetFunc = func(ID uint) (*DrillerModel, error) {
 		uri := fmt.Sprintf("%s/%s/%d.json", service.Spec.Client.URL.String(), service.Spec.ServiceName, ID)
 		req, err := http.NewRequest("GET", uri, nil)
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", service.Spec.Client.AccessToken))
-		req.Header.Add("Content-Type", "application/json")
-		req.Header.Add("Accept", "application/json")
+		headers := service.Spec.Client.CreateHeadersFunc()
+		for h := 0; h < len(headers); h++ {
+			req.Header.Add(headers[h].Key, headers[h].Value)
+		}
 
 		resp, err := service.Spec.Client.HTTPClient.Do(req)
 		if err != nil {

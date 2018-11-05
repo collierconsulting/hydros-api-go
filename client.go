@@ -2,6 +2,7 @@ package hydros
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -32,6 +33,14 @@ func NewClient(options ...ClientOptionFunc) (*Client, error) {
 		}
 	}
 
+	client.CreateHeadersFunc = func() []RequestHeader {
+		headers := make([]RequestHeader, 3)
+		headers[0] = RequestHeader{Key: "Authorization", Value: fmt.Sprintf("Bearer %s", client.AccessToken)}
+		headers[1] = RequestHeader{Key: "Content-Type", Value: "application/json"}
+		headers[2] = RequestHeader{Key: "Accept", Value: "application/json"}
+		return headers
+	}
+
 	// Create service instances
 	client.Driller = NewDrillerService(client)
 
@@ -40,11 +49,17 @@ func NewClient(options ...ClientOptionFunc) (*Client, error) {
 
 // Client Hydros API client
 type Client struct {
-	AuthType    AuthType
-	AccessToken string
-	URL         *url.URL
-	HTTPClient  http.Client
-	Driller     DrillerService
+	AuthType          AuthType
+	AccessToken       string
+	CreateHeadersFunc func() []RequestHeader
+	URL               *url.URL
+	HTTPClient        http.Client
+	Driller           DrillerService
+}
+
+type RequestHeader struct {
+	Key   string
+	Value string
 }
 
 // ClientOptionFunc Hydros API client option
