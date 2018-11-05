@@ -4,8 +4,8 @@ import (
 	"reflect"
 )
 
-// HydrosService Base interface for services
-type HydrosService interface {
+// Service Base interface for services
+type Service interface {
 	_ServiceSpec() *ServiceSpec
 }
 
@@ -24,7 +24,7 @@ type Sort struct {
 	Direction SortDirection `json:"direction"`
 }
 
-// DefaultService Standard service base struct that implements HydrosService
+// DefaultService Standard service base struct that implements Service
 type DefaultService struct {
 	Spec *ServiceSpec
 }
@@ -32,7 +32,7 @@ type DefaultService struct {
 // ServiceSpec individual service instance metadata
 type ServiceSpec struct {
 	ServiceName      string
-	HydrosClient     *HydrosClient
+	Client           *Client
 	PayloadModelType reflect.Type
 }
 

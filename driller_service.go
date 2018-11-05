@@ -9,12 +9,12 @@ import (
 )
 
 // NewDrillerService creates & initializes new driller service
-func NewDrillerService(client *HydrosClient) DrillerService {
+func NewDrillerService(client *Client) DrillerService {
 
 	drillerService := (&DefaultDrillerService{DefaultService: &DefaultService{}}).Init(
 		&ServiceSpec{
 			ServiceName:      "drillers",
-			HydrosClient:     client,
+			Client:           client,
 			PayloadModelType: reflect.TypeOf(DrillerModel{}),
 		})
 	return drillerService
@@ -22,7 +22,7 @@ func NewDrillerService(client *HydrosClient) DrillerService {
 
 // DrillerService Driller service interface
 type DrillerService interface {
-	HydrosService
+	Service
 
 	Get(ID uint) (*DrillerModel, error)
 	Count() (int, error)
@@ -33,10 +33,10 @@ type DrillerService interface {
 // DefaultDrillerService default driller service struct that contains backing functions
 type DefaultDrillerService struct {
 	*DefaultService
-	_Get    func(ID uint) (*DrillerModel, error)
-	_Count  func() (int, error)
-	_List   func(from int, size int, sort []Sort, ids []int) ([]*DrillerModel, error)
-	_Create func(model *DrillerModel) (*DrillerModel, error)
+	GetFunc    func(ID uint) (*DrillerModel, error)
+	CountFunc  func() (int, error)
+	ListFunc   func(from int, size int, sort []Sort, ids []int) ([]*DrillerModel, error)
+	CreateFunc func(model *DrillerModel) (*DrillerModel, error)
 }
 
 // Init Initializes spec and default backing functions for service
@@ -45,14 +45,14 @@ func (service *DefaultDrillerService) Init(spec *ServiceSpec) *DefaultDrillerSer
 	service.Spec = spec
 
 	// Define Get backing function
-	service._Get = func(ID uint) (*DrillerModel, error) {
-		uri := fmt.Sprintf("%s/%s/%d.json", service.Spec.HydrosClient.URL.String(), service.Spec.ServiceName, ID)
+	service.GetFunc = func(ID uint) (*DrillerModel, error) {
+		uri := fmt.Sprintf("%s/%s/%d.json", service.Spec.Client.URL.String(), service.Spec.ServiceName, ID)
 		req, err := http.NewRequest("GET", uri, nil)
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", service.Spec.HydrosClient.AccessToken))
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", service.Spec.Client.AccessToken))
 		req.Header.Add("Content-Type", "application/json")
 		req.Header.Add("Accept", "application/json")
 
-		resp, err := service.Spec.HydrosClient.HTTPClient.Do(req)
+		resp, err := service.Spec.Client.HTTPClient.Do(req)
 		if err != nil {
 			return nil, err
 		}
@@ -80,17 +80,17 @@ func (service *DefaultDrillerService) Init(spec *ServiceSpec) *DefaultDrillerSer
 	}
 
 	// Define Count backing function
-	service._Count = func() (int, error) {
+	service.CountFunc = func() (int, error) {
 		return 0, nil
 	}
 
 	// Define List backing function
-	service._List = func(from int, size int, sort []Sort, ids []int) ([]*DrillerModel, error) {
+	service.ListFunc = func(from int, size int, sort []Sort, ids []int) ([]*DrillerModel, error) {
 		return nil, nil
 	}
 
 	// Define Create backing function
-	service._Create = func(*DrillerModel) (*DrillerModel, error) {
+	service.CreateFunc = func(*DrillerModel) (*DrillerModel, error) {
 		return nil, nil
 	}
 
@@ -99,20 +99,20 @@ func (service *DefaultDrillerService) Init(spec *ServiceSpec) *DefaultDrillerSer
 
 // Get Get payload object by id
 func (service *DefaultDrillerService) Get(ID uint) (*DrillerModel, error) {
-	return service._Get(ID)
+	return service.GetFunc(ID)
 }
 
 // List List objects for service
 func (service *DefaultDrillerService) List(from int, size int, sort []Sort, ids []int) ([]*DrillerModel, error) {
-	return service._List(from, size, sort, ids)
+	return service.ListFunc(from, size, sort, ids)
 }
 
 // Count Get a total number of objects
 func (service *DefaultDrillerService) Count() (int, error) {
-	return service._Count()
+	return service.CountFunc()
 }
 
 // Create Create new
 func (service *DefaultDrillerService) Create(model *DrillerModel) (*DrillerModel, error) {
-	return service._Create(model)
+	return service.CreateFunc(model)
 }

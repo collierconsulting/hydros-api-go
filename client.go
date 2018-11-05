@@ -14,10 +14,10 @@ const (
 	DefaultAuthType = AuthTypeOpenID
 )
 
-// NewHydrosClient Creates instance of *HydrosClient
-func NewHydrosClient(options ...HydrosClientOptionFunc) (*HydrosClient, error) {
+// NewClient Creates instance of *Client
+func NewClient(options ...ClientOptionFunc) (*Client, error) {
 	parsedURL, _ := url.Parse(DefaultURL)
-	client := &HydrosClient{
+	client := &Client{
 		AuthType: DefaultAuthType,
 		URL:      parsedURL,
 		HTTPClient: http.Client{
@@ -38,8 +38,8 @@ func NewHydrosClient(options ...HydrosClientOptionFunc) (*HydrosClient, error) {
 	return client, nil
 }
 
-// HydrosClient Hydros API client
-type HydrosClient struct {
+// Client Hydros API client
+type Client struct {
 	AuthType    AuthType
 	AccessToken string
 	URL         *url.URL
@@ -47,12 +47,12 @@ type HydrosClient struct {
 	Driller     DrillerService
 }
 
-// HydrosClientOptionFunc Hydros API client option
-type HydrosClientOptionFunc func(*HydrosClient) error
+// ClientOptionFunc Hydros API client option
+type ClientOptionFunc func(*Client) error
 
 // SetHost updates host URL API calls are made against.  Otherwise, the default URL is used
-func SetHost(host string) HydrosClientOptionFunc {
-	return func(c *HydrosClient) error {
+func SetHost(host string) ClientOptionFunc {
+	return func(c *Client) error {
 		parsedURL, err := url.Parse(host)
 		if err != nil {
 			return err
@@ -66,8 +66,8 @@ func SetHost(host string) HydrosClientOptionFunc {
 }
 
 // SetAccessToken sets a global access token to be used for client for duration of session
-func SetAccessToken(accessToken string) HydrosClientOptionFunc {
-	return func(c *HydrosClient) error {
+func SetAccessToken(accessToken string) ClientOptionFunc {
+	return func(c *Client) error {
 		c.AuthType = AuthTypeOpenID
 		c.AccessToken = accessToken
 		return nil
