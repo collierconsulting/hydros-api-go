@@ -1,4 +1,4 @@
-package client
+package hydros
 
 // AuthType client authentication type
 type AuthType string

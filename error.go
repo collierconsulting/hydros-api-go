@@ -1,4 +1,4 @@
-package client
+package hydros
 
 // ErrorResponse error response payload
 type ErrorResponse struct {

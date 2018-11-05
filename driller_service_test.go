@@ -1,4 +1,4 @@
-package client
+package hydros
 
 import (
 	"github.com/stretchr/testify/assert"

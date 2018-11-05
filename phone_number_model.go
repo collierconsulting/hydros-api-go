@@ -1,4 +1,4 @@
-package client
+package hydros
 
 // PhoneNumberModel phone number payload model
 type PhoneNumberModel struct {
