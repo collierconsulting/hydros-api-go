@@ -57,6 +57,7 @@ type Client struct {
 	Driller           DrillerService
 }
 
+// RequestHeader hold key value pairs
 type RequestHeader struct {
 	Key   string
 	Value string
