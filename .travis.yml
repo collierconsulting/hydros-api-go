@@ -1,0 +1,18 @@
+language: go
+
+go:
+  - "1.11"
+
+env:
+  - GO111MODULE=on
+
+install:
+  - go get golang.org/x/lint/golint
+  - go get github.com/GeertJohan/fgt
+  - go build
+
+script:
+  - /bin/bash scripts/validate-gofmt
+  - go vet `go list ./...`
+  - $GOPATH/bin/fgt $GOPATH/bin/golint ./... | tee /dev/stderr
+  - go test -v -race `go list ./...`

@@ -1,0 +1,36 @@
+.DS_Store
+.DS_Store?
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+target
+.classpath
+.project
+.settings
+*.iml
+.idea
+var
+.local_maven_repo
+__pycache__
+generated-sources
+codealike.json
+pkg
+bin
+github.com
+*golang.org
+gopkg.in
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
