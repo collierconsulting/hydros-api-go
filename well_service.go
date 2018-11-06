@@ -9,44 +9,44 @@ import (
 	"reflect"
 )
 
-// NewDrillerService creates & initializes new driller service
-func NewDrillerService(client *Client) DrillerService {
+// NewWellService creates & initializes new well service
+func NewWellService(client *Client) WellService {
 
-	drillerService := (&DefaultDrillerService{DefaultService: &DefaultService{}}).Init(
+	wellService := (&DefaultWellService{DefaultService: &DefaultService{}}).Init(
 		&ServiceSpec{
-			ServiceName:      "drillers",
+			ServiceName:      "wells",
 			Client:           client,
-			PayloadModelType: reflect.TypeOf(DrillerModel{}),
+			PayloadModelType: reflect.TypeOf(WellModel{}),
 		})
-	return drillerService
+	return wellService
 }
 
-// DrillerService Driller service interface
-type DrillerService interface {
+// WellService Well service interface
+type WellService interface {
 	Service
 
-	Get(ID uint) (*DrillerModel, error)
+	Get(ID uint) (*WellModel, error)
 	Count() (int, error)
-	List(from int, size int, sort []Sort, ids []int) ([]*DrillerModel, error)
-	Create(model *DrillerModel) (*DrillerModel, error)
+	List(from int, size int, sort []Sort, ids []int) ([]*WellModel, error)
+	Create(model *WellModel) (*WellModel, error)
 }
 
-// DefaultDrillerService default driller service struct that contains backing functions
-type DefaultDrillerService struct {
+// DefaultWellService default well service struct that contains backing functions
+type DefaultWellService struct {
 	*DefaultService
-	GetFunc    func(ID uint) (*DrillerModel, error)
+	GetFunc    func(ID uint) (*WellModel, error)
 	CountFunc  func() (int, error)
-	ListFunc   func(from int, size int, sort []Sort, ids []int) ([]*DrillerModel, error)
-	CreateFunc func(model *DrillerModel) (*DrillerModel, error)
+	ListFunc   func(from int, size int, sort []Sort, ids []int) ([]*WellModel, error)
+	CreateFunc func(model *WellModel) (*WellModel, error)
 }
 
 // Init Initializes spec and default backing functions for service
-func (service *DefaultDrillerService) Init(spec *ServiceSpec) *DefaultDrillerService {
+func (service *DefaultWellService) Init(spec *ServiceSpec) *DefaultWellService {
 
 	service.Spec = spec
 
 	// Define Get backing function
-	service.GetFunc = func(ID uint) (*DrillerModel, error) {
+	service.GetFunc = func(ID uint) (*WellModel, error) {
 		uri := fmt.Sprintf("%s/%s/%d.json", service.Spec.Client.URL.String(), service.Spec.ServiceName, ID)
 		req, err := http.NewRequest("GET", uri, nil)
 		headers := service.Spec.Client.CreateHeadersFunc()
@@ -73,12 +73,12 @@ func (service *DefaultDrillerService) Init(spec *ServiceSpec) *DefaultDrillerSer
 			return nil, fmt.Errorf("%d error: %s", resp.StatusCode, string(bodyBytes))
 		}
 
-		var driller DrillerModel
-		err = json.Unmarshal(bodyBytes, &driller)
+		var well WellModel
+		err = json.Unmarshal(bodyBytes, &well)
 		if err != nil {
 			return nil, err
 		}
-		return &driller, nil
+		return &well, nil
 	}
 
 	// Define Count backing function
@@ -87,12 +87,12 @@ func (service *DefaultDrillerService) Init(spec *ServiceSpec) *DefaultDrillerSer
 	}
 
 	// Define List backing function
-	service.ListFunc = func(from int, size int, sort []Sort, ids []int) ([]*DrillerModel, error) {
+	service.ListFunc = func(from int, size int, sort []Sort, ids []int) ([]*WellModel, error) {
 		return nil, errors.New("not implemented")
 	}
 
 	// Define Create backing function
-	service.CreateFunc = func(*DrillerModel) (*DrillerModel, error) {
+	service.CreateFunc = func(*WellModel) (*WellModel, error) {
 		return nil, errors.New("not implemented")
 	}
 
@@ -100,21 +100,21 @@ func (service *DefaultDrillerService) Init(spec *ServiceSpec) *DefaultDrillerSer
 }
 
 // Get Get payload object by id
-func (service *DefaultDrillerService) Get(ID uint) (*DrillerModel, error) {
+func (service *DefaultWellService) Get(ID uint) (*WellModel, error) {
 	return service.GetFunc(ID)
 }
 
 // List List objects for service
-func (service *DefaultDrillerService) List(from int, size int, sort []Sort, ids []int) ([]*DrillerModel, error) {
+func (service *DefaultWellService) List(from int, size int, sort []Sort, ids []int) ([]*WellModel, error) {
 	return service.ListFunc(from, size, sort, ids)
 }
 
 // Count Get a total number of objects
-func (service *DefaultDrillerService) Count() (int, error) {
+func (service *DefaultWellService) Count() (int, error) {
 	return service.CountFunc()
 }
 
 // Create Create new
-func (service *DefaultDrillerService) Create(model *DrillerModel) (*DrillerModel, error) {
+func (service *DefaultWellService) Create(model *WellModel) (*WellModel, error) {
 	return service.CreateFunc(model)
 }
