@@ -1,6 +1,7 @@
 package hydros
 
 import (
+	"github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
@@ -31,6 +32,7 @@ func TestDefaultHistoryServiceCountFunc(t *testing.T) {
 }
 
 func TestDefaultHistoryServiceGetFunc(t *testing.T) {
+	uid := uuid.NewV4()
 
 	defaultHistoryService := (&DefaultHistoryService{DefaultService: &DefaultService{}}).
 		Init(&ServiceSpec{
@@ -38,12 +40,13 @@ func TestDefaultHistoryServiceGetFunc(t *testing.T) {
 			PayloadModelType: reflect.TypeOf(HistoryModel{}),
 		})
 
-	defaultHistoryService.GetFunc = func(ID uint) (*HistoryModel, error) {
-		return &HistoryModel{DefaultModelBase: &DefaultModelBase{ID: ID}}, nil
+	defaultHistoryService.GetFunc = func(updateID string) (*HistoryModel, error) {
+		return &HistoryModel{DefaultModelBase: &DefaultModelBase{ID: uint(1)}, UpdateID: uid.String()}, nil
 	}
-	returnedModel, err := defaultHistoryService.Get(14)
+	returnedModel, err := defaultHistoryService.Get(uid.String())
 	assert.Nil(t, err, "Error should be nil.")
-	assert.Equal(t, uint(14), returnedModel.ID)
+	assert.Equal(t, uint(1), returnedModel.ID)
+	assert.Equal(t, uid.String(), returnedModel.UpdateID)
 }
 
 func TestDefaultHistoryServiceListFunc(t *testing.T) {

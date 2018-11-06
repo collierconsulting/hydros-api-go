@@ -24,7 +24,7 @@ func NewHistoryService(client *Client) HistoryService {
 type HistoryService interface {
 	Service
 
-	Get(ID uint) (*HistoryModel, error)
+	Get(updateID string) (*HistoryModel, error)
 	Count() (int, error)
 	List(from int, size int, sort []Sort, updateIds []string, modelType string) ([]*HistoryModel, error)
 }
@@ -32,7 +32,7 @@ type HistoryService interface {
 // DefaultHistoryService default history service struct that contains backing functions
 type DefaultHistoryService struct {
 	*DefaultService
-	GetFunc   func(ID uint) (*HistoryModel, error)
+	GetFunc   func(updateID string) (*HistoryModel, error)
 	CountFunc func() (int, error)
 	ListFunc  func(from int, size int, sort []Sort, updateIds []string, modelType string) ([]*HistoryModel, error)
 }
@@ -41,9 +41,9 @@ type DefaultHistoryService struct {
 func (service *DefaultHistoryService) Init(spec *ServiceSpec) *DefaultHistoryService {
 	service.Spec = spec
 
-	// Define Get backing function
-	service.GetFunc = func(ID uint) (*HistoryModel, error) {
-		uri := fmt.Sprintf("%s/%s/%d.json", service.Spec.Client.URL.String(), service.Spec.ServiceName, ID)
+	// Define GetByUpdateID backing function
+	service.GetFunc = func(updateID string) (*HistoryModel, error) {
+		uri := fmt.Sprintf("%s/%s/%s.json", service.Spec.Client.URL.String(), service.Spec.ServiceName, updateID)
 		req, err := http.NewRequest("GET", uri, nil)
 		headers := service.Spec.Client.CreateHeadersFunc()
 		for h := 0; h < len(headers); h++ {
@@ -91,8 +91,8 @@ func (service *DefaultHistoryService) Init(spec *ServiceSpec) *DefaultHistorySer
 }
 
 // Get payload object by id
-func (service *DefaultHistoryService) Get(ID uint) (*HistoryModel, error) {
-	return service.GetFunc(ID)
+func (service *DefaultHistoryService) Get(updateID string) (*HistoryModel, error) {
+	return service.GetFunc(updateID)
 }
 
 // List object for service

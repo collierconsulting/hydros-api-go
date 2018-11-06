@@ -22,3 +22,8 @@ func (model *HistoryModel) Init(spec *ServiceSpec) *HistoryModel {
 func (model *HistoryModel) GetID() uint {
 	return model.ID
 }
+
+// GetUpdateID getter for Update ID attributes
+func (model *HistoryModel) GetUpdateID() string {
+	return model.UpdateID
+}
