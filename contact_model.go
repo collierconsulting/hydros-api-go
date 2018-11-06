@@ -1,12 +1,8 @@
 package hydros
 
-import (
-	"github.com/collierconsulting/hydros-api-go"
-)
-
 // ContactModel Contact response payload
 type ContactModel struct {
-	*hydros.DefaultModelBase
+	*DefaultModelBase
 	CompanyID      uint                      `json:"companyId"`
 	FirstName      string                    `json:"firstName"`
 	LastName       string                    `json:"lastName"`
@@ -25,7 +21,7 @@ type ContactModel struct {
 }
 
 // Init Initializes spec and default backing functions for model instance
-func (model *ContactModel) Init(spec *hydros.ServiceSpec) *ContactModel {
+func (model *ContactModel) Init(spec *ServiceSpec) *ContactModel {
 	model.Spec = spec
 
 	model._Update = func(model *ContactModel) (*ContactModel, error) {
@@ -54,5 +50,5 @@ func (model *ContactModel) Delete() error {
 
 // ContactPhoneNumberModel phone number model for contact association
 type ContactPhoneNumberModel struct {
-	*hydros.PhoneNumberModel
+	*PhoneNumberModel
 }
