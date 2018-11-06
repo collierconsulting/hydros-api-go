@@ -44,6 +44,7 @@ func NewClient(options ...ClientOptionFunc) (*Client, error) {
 	// Create service instances
 	client.Driller = NewDrillerService(client)
 	client.Well = NewWellService(client)
+	client.History = NewHistoryService(client)
 
 	return client, nil
 }
@@ -57,6 +58,7 @@ type Client struct {
 	HTTPClient        http.Client
 	Driller           DrillerService
 	Well              WellService
+	History           HistoryService
 }
 
 // RequestHeader hold key value pairs
