@@ -35,7 +35,7 @@ type ServiceSpec struct {
 	ServiceName           string
 	Client                *Client
 	PayloadModelType      reflect.Type
-	modelServiceCallMocks map[string]*ModelServiceCallMock
+	ModelServiceCallMocks map[string]*ModelServiceCallMock
 }
 
 // _ServiceSpec Getter for service spec
@@ -44,11 +44,11 @@ func (service *DefaultService) _ServiceSpec() *ServiceSpec {
 }
 
 // _SetModelServiceCallMocks Getter for service spec
-func (service *DefaultService) _SetModelServiceCallMock(targetMethodName string, modelServiceCallMocks *ModelServiceCallMock) {
+func (service *DefaultService) _SetModelServiceCallMock(targetMethodName string, ModelServiceCallMocks *ModelServiceCallMock) {
 	if service.Spec != nil {
-		if service.Spec.modelServiceCallMocks == nil {
-			service.Spec.modelServiceCallMocks = make(map[string]*ModelServiceCallMock)
+		if service.Spec.ModelServiceCallMocks == nil {
+			service.Spec.ModelServiceCallMocks = make(map[string]*ModelServiceCallMock)
 		}
-		service.Spec.modelServiceCallMocks[targetMethodName] = modelServiceCallMocks
+		service.Spec.ModelServiceCallMocks[targetMethodName] = ModelServiceCallMocks
 	}
 }

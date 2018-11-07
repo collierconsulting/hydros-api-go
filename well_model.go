@@ -81,7 +81,7 @@ type WellModel struct {
 func (model *WellModel) Init(spec *ServiceSpec) *WellModel {
 	model.Spec = spec
 
-	if serviceMock, ok := spec.modelServiceCallMocks["Save"]; ok {
+	if serviceMock, ok := spec.ModelServiceCallMocks["Save"]; ok {
 		model._Save = serviceMock.MockFunc.(func(model *WellModel) (*WellModel, error))
 	} else {
 		model._Save = func(model *WellModel) (*WellModel, error) {
@@ -89,7 +89,7 @@ func (model *WellModel) Init(spec *ServiceSpec) *WellModel {
 		}
 	}
 
-	if serviceMock, ok := spec.modelServiceCallMocks["Delete"]; ok {
+	if serviceMock, ok := spec.ModelServiceCallMocks["Delete"]; ok {
 		model._Delete = serviceMock.MockFunc.(func(model *WellModel) error)
 	} else {
 		model._Delete = func(model *WellModel) error {

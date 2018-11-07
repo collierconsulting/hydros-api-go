@@ -30,7 +30,7 @@ type DrillerModel struct {
 func (model *DrillerModel) Init(spec *ServiceSpec) *DrillerModel {
 	model.Spec = spec
 
-	if serviceMock, ok := spec.modelServiceCallMocks["Save"]; ok {
+	if serviceMock, ok := spec.ModelServiceCallMocks["Save"]; ok {
 		model._Save = serviceMock.MockFunc.(func(model *DrillerModel) (*DrillerModel, error))
 	} else {
 		model._Save = func(model *DrillerModel) (*DrillerModel, error) {
@@ -38,7 +38,7 @@ func (model *DrillerModel) Init(spec *ServiceSpec) *DrillerModel {
 		}
 	}
 
-	if serviceMock, ok := spec.modelServiceCallMocks["Delete"]; ok {
+	if serviceMock, ok := spec.ModelServiceCallMocks["Delete"]; ok {
 		model._Delete = serviceMock.MockFunc.(func(model *DrillerModel) error)
 	} else {
 		model._Delete = func(model *DrillerModel) error {
