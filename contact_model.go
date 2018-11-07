@@ -1,19 +1,20 @@
 package hydros
 
+import "gopkg.in/guregu/null.v3"
+
 // ContactModel Contact response payload
 type ContactModel struct {
 	*DefaultModelBase
-	CompanyID      uint                       `json:"companyId"`
-	FirstName      *string                    `json:"firstName,omitempty"`
-	LastName       *string                    `json:"lastName,omitempty"`
-	CompanyName    *string                    `json:"companyName,omitempty"`
-	Email          *string                    `json:"email,omitempty"`
-	Address1       *string                    `json:"address1,omitempty"`
-	Address2       *string                    `json:"address2,omitempty"`
-	City           *string                    `json:"city,omitempty"`
-	State          *string                    `json:"state,omitempty"`
-	PostalCode     *string                    `json:"postalCode,omitempty"`
-	Classification *string                    `json:"classification,omitempty"`
+	FirstName      null.String                `json:"firstName"`
+	LastName       null.String                `json:"lastName"`
+	CompanyName    null.String                `json:"companyName"`
+	Email          null.String                `json:"email"`
+	Address1       null.String                `json:"address1"`
+	Address2       null.String                `json:"address2"`
+	City           null.String                `json:"city"`
+	State          null.String                `json:"state"`
+	PostalCode     null.String                `json:"postalCode"`
+	Classification null.String                `json:"classification"`
 	PhoneNumbers   []*ContactPhoneNumberModel `json:"phoneNumbers,omitempty"`
 }
 

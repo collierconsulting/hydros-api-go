@@ -73,7 +73,7 @@ func TestDefaultDrillerServiceListFunc(t *testing.T) {
 			PayloadModelType: reflect.TypeOf(DrillerModel{}),
 		})
 
-	defaultDrillerService.ListFunc = func(from int, size int, sort []Sort, ids []int) ([]*DrillerModel, error) {
+	defaultDrillerService.ListFunc = func(from int, size int, sort []Sort, ids []uint) ([]*DrillerModel, error) {
 		list := make([]*DrillerModel, 1)
 		list[0] = &DrillerModel{DefaultModelBase: &DefaultModelBase{ID: 235711}}
 		return list, nil
