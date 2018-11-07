@@ -1,6 +1,7 @@
 package hydros
 
 import (
+	"errors"
 	"gopkg.in/guregu/null.v3"
 	"time"
 )
@@ -72,31 +73,40 @@ type WellModel struct {
 	CreatedAt                        time.Time               `json:"createdAt,omitempty"`
 	UpdatedAt                        time.Time               `json:"updatedAt,omitempty"`
 
-	_Update func(model *WellModel) (*WellModel, error)
-	_Delete func() error
+	_Save func(model *WellModel) (*WellModel, error)
+	_Delete func(model *WellModel) error
 }
 
 // Init Initializes spec and default backing functions for model instance
 func (model *WellModel) Init(spec *ServiceSpec) *WellModel {
 	model.Spec = spec
 
-	model._Update = func(model *WellModel) (*WellModel, error) {
-		return nil, nil
+	if serviceMock, ok := spec.modelServiceCallMocks["Save"]; ok {
+		model._Save = serviceMock.MockFunc.(func(model *WellModel) (*WellModel, error))
+	} else {
+		model._Save = func(model *WellModel) (*WellModel, error) {
+			return nil, errors.New("not implemented")
+		}
 	}
-	model._Delete = func() error {
-		return nil
+
+	if serviceMock, ok := spec.modelServiceCallMocks["Delete"]; ok {
+		model._Delete = serviceMock.MockFunc.(func(model *WellModel) error)
+	} else {
+		model._Delete = func(model *WellModel) error {
+			return errors.New("not implemented")
+		}
 	}
 	return model
 }
 
 // Update old model with new
-func (model *WellModel) Update(updatedModel *WellModel) (*WellModel, error) {
-	return model._Update(updatedModel)
+func (model *WellModel) Save() (*WellModel, error) {
+	return model._Save(model)
 }
 
 // Delete model
 func (model *WellModel) Delete() error {
-	return model._Delete()
+	return model._Delete(model)
 }
 
 // StatusModel status model for well association

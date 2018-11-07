@@ -1,6 +1,7 @@
 package hydros
 
 import (
+	"errors"
 	"gopkg.in/guregu/null.v3"
 )
 
@@ -33,7 +34,7 @@ func (model *DrillerModel) Init(spec *ServiceSpec) *DrillerModel {
 		model._Save = serviceMock.MockFunc.(func(model *DrillerModel) (*DrillerModel, error))
 	} else {
 		model._Save = func(model *DrillerModel) (*DrillerModel, error) {
-			return nil, nil
+			return nil, errors.New("not implemented")
 		}
 	}
 
@@ -41,7 +42,7 @@ func (model *DrillerModel) Init(spec *ServiceSpec) *DrillerModel {
 		model._Delete = serviceMock.MockFunc.(func(model *DrillerModel) error)
 	} else {
 		model._Delete = func(model *DrillerModel) error {
-			return nil
+			return errors.New("not implemented")
 		}
 	}
 	return model
