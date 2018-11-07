@@ -53,7 +53,7 @@ func (model *DrillerModel) GetID() uint {
 	return model.ID
 }
 
-// Update old model with new
+// Save changed model
 func (model *DrillerModel) Save() (*DrillerModel, error) {
 	return model._Save(model)
 }

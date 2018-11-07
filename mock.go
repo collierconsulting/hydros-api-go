@@ -12,6 +12,7 @@ type ModelServiceCallMock struct {
 	MockFunc interface{}
 }
 
+// MockModelServiceMethod mock a service method on a payload model
 func MockModelServiceMethod(service interface{}, targetModelMethod string, mockFunc interface{}) error {
 	if _, ok := service.(Service); !ok {
 		return errors.New("service arguments must implement Service interface")

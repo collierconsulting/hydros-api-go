@@ -73,7 +73,7 @@ type WellModel struct {
 	CreatedAt                        time.Time               `json:"createdAt,omitempty"`
 	UpdatedAt                        time.Time               `json:"updatedAt,omitempty"`
 
-	_Save func(model *WellModel) (*WellModel, error)
+	_Save   func(model *WellModel) (*WellModel, error)
 	_Delete func(model *WellModel) error
 }
 
@@ -99,7 +99,7 @@ func (model *WellModel) Init(spec *ServiceSpec) *WellModel {
 	return model
 }
 
-// Update old model with new
+// Save changed model
 func (model *WellModel) Save() (*WellModel, error) {
 	return model._Save(model)
 }
@@ -170,7 +170,7 @@ type ConstructionModel struct {
 	UpdatedAt           time.Time       `json:"updatedAt,omitempty"`
 }
 
-// ScreenRecord db model
+// ScreenRecord model
 type ScreenRecord struct {
 	ID          uint       `json:"id,omitempty"`
 	TopDepth    null.Float `json:"topDepth,omitempty"`
@@ -179,6 +179,7 @@ type ScreenRecord struct {
 	UpdatedAt   time.Time  `json:"updatedAt,omitempty"`
 }
 
+// GamLayerRecord model
 type GamLayerRecord struct {
 	ID   uint        `json:"id,omitempty"`
 	Name null.String `json:"name,omitempty"`
@@ -194,6 +195,7 @@ type GamLayerAlias struct {
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 }
 
+// WellTankModel model
 type WellTankModel struct {
 	ID        uint        `json:"id,omitempty"`
 	Size      null.Int    `json:"size,omitempty"`
@@ -203,7 +205,7 @@ type WellTankModel struct {
 	UpdatedAt time.Time   `json:"updatedAt,omitempty"`
 }
 
-// SystemModel db model
+// SystemModel model
 type SystemModel struct {
 	ID          uint        `json:"id,omitempty"`
 	Name        null.String `json:"name,omitempty"`
@@ -213,7 +215,7 @@ type SystemModel struct {
 	DeletedAt   *time.Time  `json:"deletedAt,omitempty"`
 }
 
-// SecondaryStatusModel db model
+// SecondaryStatusModel model
 type SecondaryStatusModel struct {
 	ID              uint      `json:"id,omitempty"`
 	SecondaryStatus string    `json:"secondaryStatus,omitempty"`
