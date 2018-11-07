@@ -124,5 +124,7 @@ func TestMockModelServiceMethod(t *testing.T) {
 
 func TestMockModelServiceMethod_WithErrors(t *testing.T) {
 
+	// TODO Need to test for wrong types
+
 }
 
