@@ -1,6 +1,7 @@
 package hydros
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -48,7 +49,7 @@ func (service *DefaultWellService) Init(spec *ServiceSpec) *DefaultWellService {
 	// Define Get backing function
 	service.GetFunc = func(ID uint) (*WellModel, error) {
 		uri := fmt.Sprintf("%s/%s/%d.json", service.Spec.Client.URL.String(), service.Spec.ServiceName, ID)
-		req, err := http.NewRequest("GET", uri, nil)
+		req, err := http.NewRequest("GET", uri, bytes.NewBuffer([]byte(`{}`)))
 		headers := service.Spec.Client.CreateHeadersFunc()
 		for h := 0; h < len(headers); h++ {
 			req.Header.Add(headers[h].Key, headers[h].Value)
