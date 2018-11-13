@@ -20,8 +20,7 @@ client, err := hydros.NewClient(
 
 ## Test Mocking
 
-This library contains helper functions to assist in mocking of service methods for testing.  Currently you can only mock service 
-methods.  I plan on additing the ability to mock model methods such as `Update()`, `Delete()` in the near future.  
+This library contains helper functions to assist in mocking of service methods for testing.  
 
 For example, you could mock out the driller service's `Get()` routine to return a driller with the same ID passed in:
 ```go
@@ -30,5 +29,15 @@ err = MockServiceMethod(
 	"Driller.Get",
 	func(ID uint) (*DrillerModel, error) {
 		return &DrillerModel{DefaultModelBase: &DefaultModelBase{ID: ID}}, nil
+	})
+```
+
+To mock service methods on the payload model such as `Delete()` and `Save()`:
+```go 
+err = MockModelServiceMethod(
+	client.Driller,
+	"Save",
+	func(model *DrillerModel) (*DrillerModel, error) {
+		return model, nil
 	})
 ```

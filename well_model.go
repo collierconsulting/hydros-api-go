@@ -1,6 +1,7 @@
 package hydros
 
 import (
+	"errors"
 	"gopkg.in/guregu/null.v3"
 	"time"
 )
@@ -72,31 +73,40 @@ type WellModel struct {
 	CreatedAt                        time.Time               `json:"createdAt,omitempty"`
 	UpdatedAt                        time.Time               `json:"updatedAt,omitempty"`
 
-	_Update func(model *WellModel) (*WellModel, error)
-	_Delete func() error
+	_Save   func(model *WellModel) (*WellModel, error)
+	_Delete func(model *WellModel) error
 }
 
 // Init Initializes spec and default backing functions for model instance
 func (model *WellModel) Init(spec *ServiceSpec) *WellModel {
 	model.Spec = spec
 
-	model._Update = func(model *WellModel) (*WellModel, error) {
-		return nil, nil
+	if serviceMock, ok := spec.ModelServiceCallMocks["Save"]; ok {
+		model._Save = serviceMock.MockFunc.(func(model *WellModel) (*WellModel, error))
+	} else {
+		model._Save = func(model *WellModel) (*WellModel, error) {
+			return nil, errors.New("not implemented")
+		}
 	}
-	model._Delete = func() error {
-		return nil
+
+	if serviceMock, ok := spec.ModelServiceCallMocks["Delete"]; ok {
+		model._Delete = serviceMock.MockFunc.(func(model *WellModel) error)
+	} else {
+		model._Delete = func(model *WellModel) error {
+			return errors.New("not implemented")
+		}
 	}
 	return model
 }
 
-// Update old model with new
-func (model *WellModel) Update(updatedModel *WellModel) (*WellModel, error) {
-	return model._Update(updatedModel)
+// Save changed model
+func (model *WellModel) Save() (*WellModel, error) {
+	return model._Save(model)
 }
 
 // Delete model
 func (model *WellModel) Delete() error {
-	return model._Delete()
+	return model._Delete(model)
 }
 
 // StatusModel status model for well association
@@ -160,7 +170,7 @@ type ConstructionModel struct {
 	UpdatedAt           time.Time       `json:"updatedAt,omitempty"`
 }
 
-// ScreenRecord db model
+// ScreenRecord model
 type ScreenRecord struct {
 	ID          uint       `json:"id,omitempty"`
 	TopDepth    null.Float `json:"topDepth,omitempty"`
@@ -169,6 +179,7 @@ type ScreenRecord struct {
 	UpdatedAt   time.Time  `json:"updatedAt,omitempty"`
 }
 
+// GamLayerRecord model
 type GamLayerRecord struct {
 	ID   uint        `json:"id,omitempty"`
 	Name null.String `json:"name,omitempty"`
@@ -184,6 +195,7 @@ type GamLayerAlias struct {
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 }
 
+// WellTankModel model
 type WellTankModel struct {
 	ID        uint        `json:"id,omitempty"`
 	Size      null.Int    `json:"size,omitempty"`
@@ -193,7 +205,7 @@ type WellTankModel struct {
 	UpdatedAt time.Time   `json:"updatedAt,omitempty"`
 }
 
-// SystemModel db model
+// SystemModel model
 type SystemModel struct {
 	ID          uint        `json:"id,omitempty"`
 	Name        null.String `json:"name,omitempty"`
@@ -203,7 +215,7 @@ type SystemModel struct {
 	DeletedAt   *time.Time  `json:"deletedAt,omitempty"`
 }
 
-// SecondaryStatusModel db model
+// SecondaryStatusModel model
 type SecondaryStatusModel struct {
 	ID              uint      `json:"id,omitempty"`
 	SecondaryStatus string    `json:"secondaryStatus,omitempty"`

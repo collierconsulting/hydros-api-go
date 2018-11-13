@@ -7,6 +7,24 @@ import (
 	"strings"
 )
 
+// ModelServiceCallMock holds mock definition for service instance
+type ModelServiceCallMock struct {
+	MockFunc interface{}
+}
+
+// MockModelServiceMethod mock a service method on a payload model
+func MockModelServiceMethod(service interface{}, targetModelMethod string, mockFunc interface{}) error {
+	if _, ok := service.(Service); !ok {
+		return errors.New("service arguments must implement Service interface")
+	}
+	//modelType := service.(Service)._ServiceSpec().PayloadModelType
+	//if _, ok := modelType.MethodByName(targetModelMethod); !ok {
+	//	return fmt.Errorf("could not find method '%s' in service payload model '%s'", targetModelMethod, modelType.Name())
+	//}
+	service.(Service)._SetModelServiceCallMock(targetModelMethod, &ModelServiceCallMock{MockFunc: mockFunc})
+	return nil
+}
+
 // MockServiceMethod mock a method on a service
 func MockServiceMethod(client interface{}, targetServiceMethod string, mockFunc interface{}) error {
 

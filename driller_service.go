@@ -27,7 +27,7 @@ type DrillerService interface {
 
 	Get(ID uint) (*DrillerModel, error)
 	Count() (int, error)
-	List(from int, size int, sort []Sort, ids []int) ([]*DrillerModel, error)
+	List(from int, size int, sort []Sort, ids []uint) ([]*DrillerModel, error)
 	Create(model *DrillerModel) (*DrillerModel, error)
 }
 
@@ -36,7 +36,7 @@ type DefaultDrillerService struct {
 	*DefaultService
 	GetFunc    func(ID uint) (*DrillerModel, error)
 	CountFunc  func() (int, error)
-	ListFunc   func(from int, size int, sort []Sort, ids []int) ([]*DrillerModel, error)
+	ListFunc   func(from int, size int, sort []Sort, ids []uint) ([]*DrillerModel, error)
 	CreateFunc func(model *DrillerModel) (*DrillerModel, error)
 }
 
@@ -87,7 +87,7 @@ func (service *DefaultDrillerService) Init(spec *ServiceSpec) *DefaultDrillerSer
 	}
 
 	// Define List backing function
-	service.ListFunc = func(from int, size int, sort []Sort, ids []int) ([]*DrillerModel, error) {
+	service.ListFunc = func(from int, size int, sort []Sort, ids []uint) ([]*DrillerModel, error) {
 		return nil, errors.New("not implemented")
 	}
 
@@ -105,7 +105,7 @@ func (service *DefaultDrillerService) Get(ID uint) (*DrillerModel, error) {
 }
 
 // List List objects for service
-func (service *DefaultDrillerService) List(from int, size int, sort []Sort, ids []int) ([]*DrillerModel, error) {
+func (service *DefaultDrillerService) List(from int, size int, sort []Sort, ids []uint) ([]*DrillerModel, error) {
 	return service.ListFunc(from, size, sort, ids)
 }
 
