@@ -36,7 +36,7 @@ func NewClient(options ...ClientOptionFunc) (*Client, error) {
 	client.CreateHeadersFunc = func() []RequestHeader {
 		headers := make([]RequestHeader, 2)
 		headers[0] = RequestHeader{Key: "Authorization", Value: fmt.Sprintf("Bearer %s", client.AccessToken)}
-		headers[1] = RequestHeader{Key: "Accept", Value: "application/json"}
+		headers[1] = RequestHeader{Key: "Content-Type", Value: "application/json"}
 		return headers
 	}
 
