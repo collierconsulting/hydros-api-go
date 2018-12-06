@@ -83,6 +83,12 @@ type WellModel struct {
 	_TriggerUpdate func(model *WellModel) (*WellModel, error)
 }
 
+// WellSearchResults total and result list of found wells
+type WellSearchResults struct {
+	Total   int          `json:"total"`
+	Results []*WellModel `json:"results"`
+}
+
 // Init Initializes spec and default backing functions for model instance
 func (model *WellModel) Init(spec *ServiceSpec) *WellModel {
 	model.Spec = spec

@@ -29,7 +29,7 @@ type WellService interface {
 	Get(ID uint) (*WellModel, error)
 	Count() (int, error)
 	List(from int, size int, sort []Sort, ids []uint) ([]*WellModel, error)
-	Search(query string, filters []string, from int, size int, sort []Sort) ([]*WellModel, error)
+	Search(query string, filters []string, from int, size int, sort []Sort) (*WellSearchResults, error)
 	Create(model *WellModel) (*WellModel, error)
 }
 
@@ -39,7 +39,7 @@ type DefaultWellService struct {
 	GetFunc    func(ID uint) (*WellModel, error)
 	CountFunc  func() (int, error)
 	ListFunc   func(from int, size int, sort []Sort, ids []uint) ([]*WellModel, error)
-	SearchFunc func(query string, filters []string, from int, size int, sort []Sort) ([]*WellModel, error)
+	SearchFunc func(query string, filters []string, from int, size int, sort []Sort) (*WellSearchResults, error)
 	CreateFunc func(model *WellModel) (*WellModel, error)
 }
 
@@ -95,7 +95,7 @@ func (service *DefaultWellService) Init(spec *ServiceSpec) *DefaultWellService {
 	}
 
 	// Define Search backing function
-	service.SearchFunc = func(query string, filters []string, from int, size int, sorts []Sort) ([]*WellModel, error) {
+	service.SearchFunc = func(query string, filters []string, from int, size int, sorts []Sort) (*WellSearchResults, error) {
 
 		uri := fmt.Sprintf("%s/%s/search.json", service.Spec.Client.URL.String(), service.Spec.ServiceName)
 		req, err := http.NewRequest("GET", uri, nil)
@@ -141,16 +141,16 @@ func (service *DefaultWellService) Init(spec *ServiceSpec) *DefaultWellService {
 			return nil, fmt.Errorf("%d error: %s", resp.StatusCode, string(bodyBytes))
 		}
 
-		var wells []WellModel
-		err = json.Unmarshal(bodyBytes, &wells)
+		var wellSearchResults WellSearchResults
+		err = json.Unmarshal(bodyBytes, &wellSearchResults)
 		if err != nil {
 			return nil, err
 		}
-		initializedWells := make([]*WellModel, len(wells))
-		for i := 0; i < len(wells); i++ {
-			initializedWells[i] = wells[i].Init(spec)
+		initializedWells := make([]*WellModel, len(wellSearchResults.Results))
+		for i := 0; i < len(wellSearchResults.Results); i++ {
+			initializedWells[i] = wellSearchResults.Results[i].Init(spec)
 		}
-		return initializedWells, nil
+		return &WellSearchResults{wellSearchResults.Total, initializedWells}, nil
 	}
 
 	// Define Create backing function
@@ -172,7 +172,7 @@ func (service *DefaultWellService) List(from int, size int, sort []Sort, ids []u
 }
 
 // Search wells
-func (service *DefaultWellService) Search(query string, filters []string, from int, size int, sort []Sort) ([]*WellModel, error) {
+func (service *DefaultWellService) Search(query string, filters []string, from int, size int, sort []Sort) (*WellSearchResults, error) {
 	return service.SearchFunc(query, filters, from, size, sort)
 }
 
