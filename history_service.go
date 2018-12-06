@@ -74,7 +74,7 @@ func (service *DefaultHistoryService) Init(spec *ServiceSpec) *DefaultHistorySer
 		if err != nil {
 			return nil, err
 		}
-		return &history, nil
+		return history.Init(service.Spec), nil
 	}
 
 	// Define Count backing function

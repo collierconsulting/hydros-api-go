@@ -78,7 +78,7 @@ func (service *DefaultDrillerService) Init(spec *ServiceSpec) *DefaultDrillerSer
 		if err != nil {
 			return nil, err
 		}
-		return &driller, nil
+		return driller.Init(service.Spec), nil
 	}
 
 	// Define Count backing function

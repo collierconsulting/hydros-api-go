@@ -139,7 +139,7 @@ func (model *WellModel) Init(spec *ServiceSpec) *WellModel {
 			if err != nil {
 				return nil, err
 			}
-			return &well, nil
+			return well.Init(model.Spec), nil
 		}
 	}
 
