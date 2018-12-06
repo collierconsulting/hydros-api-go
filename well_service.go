@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
+	"strings"
 )
 
 // NewWellService creates & initializes new well service
@@ -27,7 +28,8 @@ type WellService interface {
 
 	Get(ID uint) (*WellModel, error)
 	Count() (int, error)
-	List(from int, size int, sort []Sort, ids []int) ([]*WellModel, error)
+	List(from int, size int, sort []Sort, ids []uint) ([]*WellModel, error)
+	Search(query string, filters []string, from int, size int, sort []Sort) ([]*WellModel, error)
 	Create(model *WellModel) (*WellModel, error)
 }
 
@@ -36,7 +38,8 @@ type DefaultWellService struct {
 	*DefaultService
 	GetFunc    func(ID uint) (*WellModel, error)
 	CountFunc  func() (int, error)
-	ListFunc   func(from int, size int, sort []Sort, ids []int) ([]*WellModel, error)
+	ListFunc   func(from int, size int, sort []Sort, ids []uint) ([]*WellModel, error)
+	SearchFunc func(query string, filters []string, from int, size int, sort []Sort) ([]*WellModel, error)
 	CreateFunc func(model *WellModel) (*WellModel, error)
 }
 
@@ -87,8 +90,67 @@ func (service *DefaultWellService) Init(spec *ServiceSpec) *DefaultWellService {
 	}
 
 	// Define List backing function
-	service.ListFunc = func(from int, size int, sort []Sort, ids []int) ([]*WellModel, error) {
+	service.ListFunc = func(from int, size int, sort []Sort, ids []uint) ([]*WellModel, error) {
 		return nil, errors.New("not implemented")
+	}
+
+	// Define Search backing function
+	service.SearchFunc = func(query string, filters []string, from int, size int, sorts []Sort) ([]*WellModel, error) {
+
+		uri := fmt.Sprintf("%s/%s/search.json", service.Spec.Client.URL.String(), service.Spec.ServiceName)
+		req, err := http.NewRequest("GET", uri, nil)
+		headers := service.Spec.Client.CreateHeadersFunc()
+		for h := 0; h < len(headers); h++ {
+			req.Header.Add(headers[h].Key, headers[h].Value)
+		}
+
+		q := req.URL.Query()
+		if sorts != nil && len(sorts) > 0 {
+			var sortStr []string
+			for _, sort := range sorts {
+				sortStr = append(sortStr, fmt.Sprint(sort.Field, ":", sort.Direction))
+			}
+			q.Add("sort", strings.Join(sortStr, ","))
+		}
+		if filters != nil && len(filters) > 0 {
+			q.Add("filters", strings.Join(filters, ","))
+		}
+		q.Add("from", fmt.Sprint(from))
+		if size > 150 {
+			return nil, errors.New("size parameter must not exceed 150")
+		}
+		q.Add("size", fmt.Sprint(size))
+		req.URL.RawQuery = q.Encode()
+
+		resp, err := service.Spec.Client.HTTPClient.Do(req)
+		if err != nil {
+			return nil, err
+		}
+
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		if resp.StatusCode != 200 {
+			var errorResponse ErrorResponse
+			err = json.Unmarshal(bodyBytes, &errorResponse)
+			if err == nil && errorResponse.Message != "" {
+				return nil, fmt.Errorf("%s: %s", errorResponse.Message, errorResponse.Description)
+			}
+			return nil, fmt.Errorf("%d error: %s", resp.StatusCode, string(bodyBytes))
+		}
+
+		var wells []WellModel
+		err = json.Unmarshal(bodyBytes, &wells)
+		if err != nil {
+			return nil, err
+		}
+		initializedWells := make([]*WellModel, len(wells))
+		for i := 0; i < len(wells); i++ {
+			initializedWells[i] = wells[i].Init(spec)
+		}
+		return initializedWells, nil
 	}
 
 	// Define Create backing function
@@ -105,8 +167,13 @@ func (service *DefaultWellService) Get(ID uint) (*WellModel, error) {
 }
 
 // List List objects for service
-func (service *DefaultWellService) List(from int, size int, sort []Sort, ids []int) ([]*WellModel, error) {
+func (service *DefaultWellService) List(from int, size int, sort []Sort, ids []uint) ([]*WellModel, error) {
 	return service.ListFunc(from, size, sort, ids)
+}
+
+// Search wells
+func (service *DefaultWellService) Search(query string, filters []string, from int, size int, sort []Sort) ([]*WellModel, error) {
+	return service.SearchFunc(query, filters, from, size, sort)
 }
 
 // Count Get a total number of objects

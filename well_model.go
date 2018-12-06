@@ -1,8 +1,12 @@
 package hydros
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"gopkg.in/guregu/null.v3"
+	"io/ioutil"
+	"net/http"
 	"time"
 )
 
@@ -16,17 +20,17 @@ type WellModel struct {
 	Approved                         bool                    `json:"approved,omitempty"`
 	Status                           *StatusModel            `json:"status,omitempty"`
 	SystemID                         uint                    `json:"systemId,omitempty"`
-	System                           *SystemModel            `json:"system,omitempty,omitempty"`
+	System                           *SystemModel            `json:"system,omitempty"`
 	Location                         *LocationModel          `json:"location,omitempty"`
 	SecondaryStatuses                []*SecondaryStatusModel `json:"secondaryStatuses,omitempty"`
 	Owner                            *ContactModel           `json:"owner,omitempty"`
-	Applicant                        *ContactModel           `json:"applicant,omitempty,omitempty"`
-	Driller                          *DrillerModel           `json:"driller,omitempty,omitempty"`
+	Applicant                        *ContactModel           `json:"applicant,omitempty"`
+	Driller                          *DrillerModel           `json:"driller,omitempty"`
 	DrillerIsContact                 bool                    `json:"drillerIsContact,omitempty"`
-	PumpInstaller                    *DrillerModel           `json:"pumpInstaller,omitempty,omitempty"`
+	PumpInstaller                    *DrillerModel           `json:"pumpInstaller,omitempty"`
 	PumpInstallerIsContact           bool                    `json:"pumpInstallerIsContact,omitempty"`
-	Tank                             *WellTankModel          `json:"tank,omitempty,omitempty"`
-	Construction                     *ConstructionModel      `json:"construction,omitempty,omitempty"`
+	Tank                             *WellTankModel          `json:"tank,omitempty"`
+	Construction                     *ConstructionModel      `json:"construction,omitempty"`
 	WellReplacementID                uint                    `json:"wellReplacementId,omitempty"`
 	EstimatedDrillingDate            null.Time               `json:"estimatedDrillingDate,omitempty"`
 	DrillingDate                     null.Time               `json:"drillingDate,omitempty"`
@@ -73,8 +77,10 @@ type WellModel struct {
 	CreatedAt                        time.Time               `json:"createdAt,omitempty"`
 	UpdatedAt                        time.Time               `json:"updatedAt,omitempty"`
 
-	_Save   func(model *WellModel) (*WellModel, error)
-	_Delete func(model *WellModel) error
+	_Update        func(model *WellModel, JSONMergePatch []byte) (*WellModel, error)
+	_Save          func(model *WellModel) (*WellModel, error)
+	_Delete        func(model *WellModel) error
+	_TriggerUpdate func(model *WellModel) (*WellModel, error)
 }
 
 // Init Initializes spec and default backing functions for model instance
@@ -89,6 +95,54 @@ func (model *WellModel) Init(spec *ServiceSpec) *WellModel {
 		}
 	}
 
+	if serviceMock, ok := spec.ModelServiceCallMocks["Update"]; ok {
+		model._Update = serviceMock.MockFunc.(func(model *WellModel, JSONMergePatch []byte) (*WellModel, error))
+	} else {
+		model._Update = func(model *WellModel, JSONMergePatch []byte) (*WellModel, error) {
+			return nil, errors.New("not implemented")
+		}
+	}
+
+	if serviceMock, ok := spec.ModelServiceCallMocks["TriggerUpdate"]; ok {
+		model._TriggerUpdate = serviceMock.MockFunc.(func(model *WellModel) (*WellModel, error))
+	} else {
+		model._TriggerUpdate = func(model *WellModel) (*WellModel, error) {
+			uri := fmt.Sprintf("%s/%s/%d/triggerUpdate.json",
+				model.Spec.Client.URL.String(), model.Spec.ServiceName, model.ID)
+			req, err := http.NewRequest("GET", uri, nil)
+			headers := model.Spec.Client.CreateHeadersFunc()
+			for h := 0; h < len(headers); h++ {
+				req.Header.Add(headers[h].Key, headers[h].Value)
+			}
+
+			resp, err := model.Spec.Client.HTTPClient.Do(req)
+			if err != nil {
+				return nil, err
+			}
+
+			bodyBytes, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+
+			if resp.StatusCode != 200 {
+				var errorResponse ErrorResponse
+				err = json.Unmarshal(bodyBytes, &errorResponse)
+				if err == nil && errorResponse.Message != "" {
+					return nil, fmt.Errorf("%s: %s", errorResponse.Message, errorResponse.Description)
+				}
+				return nil, fmt.Errorf("%d error: %s", resp.StatusCode, string(bodyBytes))
+			}
+
+			var well WellModel
+			err = json.Unmarshal(bodyBytes, &well)
+			if err != nil {
+				return nil, err
+			}
+			return &well, nil
+		}
+	}
+
 	if serviceMock, ok := spec.ModelServiceCallMocks["Delete"]; ok {
 		model._Delete = serviceMock.MockFunc.(func(model *WellModel) error)
 	} else {
@@ -97,6 +151,16 @@ func (model *WellModel) Init(spec *ServiceSpec) *WellModel {
 		}
 	}
 	return model
+}
+
+// Update old model with patch data
+func (model *WellModel) Update(JSONMergePatch []byte) (*WellModel, error) {
+	return model._Update(model, JSONMergePatch)
+}
+
+// TriggerUpdate update well entry in search DB and take snapshot of well state
+func (model *WellModel) TriggerUpdate() (*WellModel, error) {
+	return model._TriggerUpdate(model)
 }
 
 // Save changed model
@@ -111,10 +175,8 @@ func (model *WellModel) Delete() error {
 
 // StatusModel status model for well association
 type StatusModel struct {
-	ID        uint      `json:"id,omitempty"`
-	Status    string    `json:"status,omitempty"`
-	CreatedAt time.Time `json:"createdAt,omitempty"`
-	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	ID     uint   `json:"id,omitempty"`
+	Status string `json:"status,omitempty"`
 }
 
 // LocationModel location model for well association
@@ -140,8 +202,6 @@ type LocationModel struct {
 	DistanceToPropertyLine2Type null.String `json:"distanceToPropertyLine2Type,omitempty"`
 	ContinuousAcredTotal        null.Float  `json:"continuousAcredTotal,omitempty"`
 	DistNearestWellOnProperty   null.Float  `json:"distNearestWellOnProperty,omitempty"`
-	CreatedAt                   time.Time   `json:"createdAt,omitempty"`
-	UpdatedAt                   time.Time   `json:"updatedAt,omitempty"`
 }
 
 // ConstructionModel construction model for well association
@@ -164,10 +224,8 @@ type ConstructionModel struct {
 	DaysServicedPerYear null.Int        `json:"daysServicedPerYear,omitempty"`
 	Confined            bool            `json:"confined,omitempty"`
 	Screens             []*ScreenRecord `json:"screens,omitempty"`
-	GamLayerAlias       *GamLayerAlias  `json:"gamLayerAlias,omitempty,omitempty"`
-	GamLayer            *GamLayerRecord `json:"gamLayer,omitempty,omitempty"`
-	CreatedAt           time.Time       `json:"createdAt,omitempty"`
-	UpdatedAt           time.Time       `json:"updatedAt,omitempty"`
+	GamLayerAlias       *GamLayerAlias  `json:"gamLayerAlias,omitempty"`
+	GamLayer            *GamLayerRecord `json:"gamLayer,omitempty"`
 }
 
 // ScreenRecord model
@@ -175,8 +233,6 @@ type ScreenRecord struct {
 	ID          uint       `json:"id,omitempty"`
 	TopDepth    null.Float `json:"topDepth,omitempty"`
 	BottomDepth null.Float `json:"bottomDepth,omitempty"`
-	CreatedAt   time.Time  `json:"createdAt,omitempty"`
-	UpdatedAt   time.Time  `json:"updatedAt,omitempty"`
 }
 
 // GamLayerRecord model
@@ -187,22 +243,18 @@ type GamLayerRecord struct {
 
 // GamLayerAlias payload
 type GamLayerAlias struct {
-	ID        uint      `json:"id,omitempty"`
-	LayerID   uint      `json:"layerId,omitempty"`
-	Alias     string    `json:"alias,omitempty"`
-	LongAlias string    `json:"longAlias,omitempty"`
-	CreatedAt time.Time `json:"createdAt,omitempty"`
-	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	ID        uint   `json:"id,omitempty"`
+	LayerID   uint   `json:"layerId,omitempty"`
+	Alias     string `json:"alias,omitempty"`
+	LongAlias string `json:"longAlias,omitempty"`
 }
 
 // WellTankModel model
 type WellTankModel struct {
-	ID        uint        `json:"id,omitempty"`
-	Size      null.Int    `json:"size,omitempty"`
-	Volume    null.Float  `json:"volume,omitempty"`
-	Design    null.String `json:"design,omitempty"`
-	CreatedAt time.Time   `json:"createdAt,omitempty"`
-	UpdatedAt time.Time   `json:"updatedAt,omitempty"`
+	ID     uint        `json:"id,omitempty"`
+	Size   null.Int    `json:"size,omitempty"`
+	Volume null.Float  `json:"volume,omitempty"`
+	Design null.String `json:"design,omitempty"`
 }
 
 // SystemModel model
@@ -217,8 +269,6 @@ type SystemModel struct {
 
 // SecondaryStatusModel model
 type SecondaryStatusModel struct {
-	ID              uint      `json:"id,omitempty"`
-	SecondaryStatus string    `json:"secondaryStatus,omitempty"`
-	CreatedAt       time.Time `json:"createdAt,omitempty"`
-	UpdatedAt       time.Time `json:"updatedAt,omitempty"`
+	ID              uint   `json:"id,omitempty"`
+	SecondaryStatus string `json:"secondaryStatus,omitempty"`
 }
