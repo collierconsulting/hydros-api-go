@@ -1,6 +1,7 @@
 package hydros
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -113,9 +114,15 @@ func (model *WellModel) Init(spec *ServiceSpec) *WellModel {
 		model._TriggerUpdate = serviceMock.MockFunc.(func(model *WellModel) (*WellModel, error))
 	} else {
 		model._TriggerUpdate = func(model *WellModel) (*WellModel, error) {
+
+			jsonStr, err := json.Marshal(model)
+			if err != nil {
+				return nil, err
+			}
+
 			uri := fmt.Sprintf("%s/%s/%d/triggerUpdate.json",
 				model.Spec.Client.URL.String(), model.Spec.ServiceName, model.ID)
-			req, err := http.NewRequest("PUT", uri, nil)
+			req, err := http.NewRequest("PUT", uri, bytes.NewBuffer(jsonStr))
 			headers := model.Spec.Client.CreateHeadersFunc()
 			for h := 0; h < len(headers); h++ {
 				req.Header.Add(headers[h].Key, headers[h].Value)
