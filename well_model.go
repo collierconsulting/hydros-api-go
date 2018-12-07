@@ -24,6 +24,7 @@ type WellModel struct {
 	System                           *SystemModel            `json:"system,omitempty"`
 	Location                         *LocationModel          `json:"location,omitempty"`
 	SecondaryStatuses                []*SecondaryStatusModel `json:"secondaryStatuses,omitempty"`
+	Contacts                         []*ContactModel         `json:"contacts"`
 	Owner                            *ContactModel           `json:"owner,omitempty"`
 	Applicant                        *ContactModel           `json:"applicant,omitempty"`
 	Driller                          *DrillerModel           `json:"driller,omitempty"`
@@ -75,6 +76,7 @@ type WellModel struct {
 	CertifiedProvideReports          bool                    `json:"certifiedProvideReports,omitempty"`
 	EstimatedAnnualWaterProduction   null.Int                `json:"estimatedAnnualWaterProduction,omitempty"`
 	WellLogReceived                  null.Time               `json:"wellLogReceived,omitempty"`
+	WellUses                         []WellUse               `json:"wellUses"`
 	CreatedAt                        time.Time               `json:"createdAt,omitempty"`
 	UpdatedAt                        time.Time               `json:"updatedAt,omitempty"`
 
@@ -284,4 +286,11 @@ type SystemModel struct {
 type SecondaryStatusModel struct {
 	ID              uint   `json:"id,omitempty"`
 	SecondaryStatus string `json:"secondaryStatus,omitempty"`
+}
+
+// WellUse model
+type WellUse struct {
+	ID       uint   `json:"id"`
+	WellUse  string `json:"wellUse"`
+	IsExempt bool   `json:"isExempt"`
 }
