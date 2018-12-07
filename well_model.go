@@ -115,7 +115,7 @@ func (model *WellModel) Init(spec *ServiceSpec) *WellModel {
 		model._TriggerUpdate = func(model *WellModel) (*WellModel, error) {
 			uri := fmt.Sprintf("%s/%s/%d/triggerUpdate.json",
 				model.Spec.Client.URL.String(), model.Spec.ServiceName, model.ID)
-			req, err := http.NewRequest("GET", uri, nil)
+			req, err := http.NewRequest("PUT", uri, nil)
 			headers := model.Spec.Client.CreateHeadersFunc()
 			for h := 0; h < len(headers); h++ {
 				req.Header.Add(headers[h].Key, headers[h].Value)
