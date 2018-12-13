@@ -290,7 +290,7 @@ type SecondaryStatusModel struct {
 
 // WellUse model
 type WellUse struct {
-	ID       uint   `json:"id"`
-	WellUse  string `json:"wellUse"`
-	IsExempt bool   `json:"isExempt"`
+	ID      uint   `json:"id"`
+	WellUse string `json:"wellUse"`
+	Exempt  bool   `json:"exempt"`
 }
