@@ -26,16 +26,16 @@ type PermitService interface {
 	Service
 	Get(ID uint) (*PermitModel, error)
 	Count() (int, error)
-	List(from int, size int, sort[]Sort, ids []uint, aggregate bool) ([]*PermitModel, error)
+	List(from int, size int, sort []Sort, ids []uint, aggregate bool) ([]*PermitModel, error)
 	AmendWellPermits(wellID uint, amendWellPermitsRequest AmendWellPermitsRequest) ([]PermitModel, error)
 }
 
 // DefaultPermitService default permit service struct that contains backing functions
 type DefaultPermitService struct {
 	*DefaultService
-	GetFunc func(ID uint) (*PermitModel, error)
-	CountFunc func() (int, error)
-	ListFunc func(from int, size int, sort []Sort, ids []uint, aggregate bool) ([]*PermitModel, error)
+	GetFunc              func(ID uint) (*PermitModel, error)
+	CountFunc            func() (int, error)
+	ListFunc             func(from int, size int, sort []Sort, ids []uint, aggregate bool) ([]*PermitModel, error)
 	AmendWellPermitsFunc func(wellID uint, amendWellPermitsRequest AmendWellPermitsRequest) ([]PermitModel, error)
 }
 

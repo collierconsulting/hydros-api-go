@@ -64,7 +64,7 @@ func TestDefaultPermitServiceListFunc(t *testing.T) {
 func TestDefaultPermitService_AmendWellPermits(t *testing.T) {
 	defaultPermitService := (&DefaultPermitService{DefaultService: &DefaultService{}}).
 		Init(&ServiceSpec{
-			ServiceName: "test",
+			ServiceName:      "test",
 			PayloadModelType: reflect.TypeOf(PermitModel{}),
 		})
 
