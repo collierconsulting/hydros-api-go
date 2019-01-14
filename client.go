@@ -44,6 +44,7 @@ func NewClient(options ...ClientOptionFunc) (*Client, error) {
 	client.Driller = NewDrillerService(client)
 	client.Well = NewWellService(client)
 	client.History = NewHistoryService(client)
+	client.Permit = NewPermitService(client)
 
 	return client, nil
 }
@@ -58,6 +59,7 @@ type Client struct {
 	Driller           DrillerService
 	Well              WellService
 	History           HistoryService
+	Permit            PermitService
 }
 
 // RequestHeader hold key value pairs
