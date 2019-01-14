@@ -14,7 +14,7 @@ import (
 func NewPermitService(client *Client) PermitService {
 	permitService := (&DefaultPermitService{DefaultService: &DefaultService{}}).Init(
 		&ServiceSpec{
-			ServiceName:      "permit",
+			ServiceName:      "permits",
 			Client:           client,
 			PayloadModelType: reflect.TypeOf(PermitModel{}),
 		})
