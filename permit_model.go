@@ -59,4 +59,5 @@ func (model *PermitModel) GetID() uint {
 
 type AmendWellPermitsRequest struct {
 	HistoryUpdateID string `json:"historyUpdateId"`
+	Patch           string `json:"patch"`
 }
