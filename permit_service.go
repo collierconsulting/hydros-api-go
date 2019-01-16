@@ -81,7 +81,7 @@ func (service *DefaultPermitService) Init(spec *ServiceSpec) *DefaultPermitServi
 			return nil, err
 		}
 
-		if resp.StatusCode != 200 {
+		if resp.StatusCode != http.StatusAccepted {
 			var errorResponse ErrorResponse
 			err = json.Unmarshal(bodyBytes, &errorResponse)
 			if err == nil && errorResponse.Message != "" {
