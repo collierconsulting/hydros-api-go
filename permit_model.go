@@ -8,7 +8,7 @@ import (
 // PermitModel Permit response payload
 type PermitModel struct {
 	*DefaultModelBase
-	CompanyID              string              `json:"companyId"`
+	CompanyID              uint                `json:"companyId"`
 	WellID                 uint                `json:"wellId"`
 	HistoryUpdateID        string              `json:"historyUpdateId"`
 	PermitTemplateID       uint                `json:"permitTemplateId"`
