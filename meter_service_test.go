@@ -54,6 +54,25 @@ func TestDefaultMeterServiceGetFunc(t *testing.T) {
 	assert.Equal(t, uint(3333), returnedModel.ID)
 }
 
+func TestDefaultMEterServiceListByWellIDFunc(t *testing.T) {
+
+	defaultMeterService := (&DefaultMeterService{DefaultService: &DefaultService{}}).
+		Init(&ServiceSpec{
+			ServiceName:      "test",
+			PayloadModelType: reflect.TypeOf(MeterModel{}),
+		})
+
+	defaultMeterService.ListByWellIDFunc = func(wellID uint) ([]MeterModel, error) {
+		var meters []MeterModel
+		meters = append(meters, MeterModel{DefaultModelBase: &DefaultModelBase{ID: 3}})
+		return meters, nil
+	}
+	returnedModels, err := defaultMeterService.ListByWellID(1)
+	assert.Nil(t, err, "Error should be nil.")
+	assert.Len(t, returnedModels, 1)
+	assert.Equal(t, uint(3), returnedModels[0].ID)
+}
+
 func TestDefaultMeterServiceUpdateFunc(t *testing.T) {
 
 	defaultMeterService := (&DefaultMeterService{DefaultService: &DefaultService{}}).

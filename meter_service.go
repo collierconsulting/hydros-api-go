@@ -26,6 +26,7 @@ type MeterService interface {
 	Service
 
 	Get(wellID uint, ID uint) (*MeterModel, error)
+	ListByWellID(wellID uint) ([]MeterModel, error)
 	Create(model *MeterModel) (*MeterModel, error)
 	Update(model *MeterModel) (*MeterModel, error)
 	Decommission(id uint, decommissionTime time.Time) (*MeterModel, error)
@@ -35,6 +36,7 @@ type MeterService interface {
 type DefaultMeterService struct {
 	*DefaultService
 	GetFunc          func(wellID uint, ID uint) (*MeterModel, error)
+	ListByWellIDFunc func(wellID uint) ([]MeterModel, error)
 	CreateFunc       func(model *MeterModel) (*MeterModel, error)
 	UpdateFunc       func(model *MeterModel) (*MeterModel, error)
 	DecommissionFunc func(id uint, decommissionTime time.Time) (*MeterModel, error)
@@ -80,6 +82,42 @@ func (service *DefaultMeterService) Init(spec *ServiceSpec) *DefaultMeterService
 		return meter.Init(service.Spec), nil
 	}
 
+	// Define ListByWellID backing function
+	service.ListByWellIDFunc = func(wellID uint) ([]MeterModel, error) {
+		uri := fmt.Sprintf("%s/wells/%d/meters.json", service.Spec.Client.URL.String(), wellID)
+		req, err := http.NewRequest("GET", uri, nil)
+		headers := service.Spec.Client.CreateHeadersFunc()
+		for h := 0; h < len(headers); h++ {
+			req.Header.Add(headers[h].Key, headers[h].Value)
+		}
+
+		resp, err := service.Spec.Client.HTTPClient.Do(req)
+		if err != nil {
+			return nil, err
+		}
+
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		if resp.StatusCode != 200 {
+			var errorResponse ErrorResponse
+			err = json.Unmarshal(bodyBytes, &errorResponse)
+			if err == nil && errorResponse.Message != "" {
+				return nil, fmt.Errorf("%s: %s", errorResponse.Message, errorResponse.Description)
+			}
+			return nil, fmt.Errorf("%d error: %s", resp.StatusCode, string(bodyBytes))
+		}
+
+		var meters []MeterModel
+		err = json.Unmarshal(bodyBytes, &meters)
+		if err != nil {
+			return nil, err
+		}
+		return meters, nil
+	}
+
 	// Define Create backing function
 	service.CreateFunc = func(model *MeterModel) (*MeterModel, error) {
 		return nil, errors.New("not implemented")
@@ -101,6 +139,11 @@ func (service *DefaultMeterService) Init(spec *ServiceSpec) *DefaultMeterService
 // Get Get payload object by id
 func (service *DefaultMeterService) Get(wellID uint, ID uint) (*MeterModel, error) {
 	return service.GetFunc(wellID, ID)
+}
+
+// List Get list of meters for well
+func (service *DefaultMeterService) ListByWellID(wellID uint) ([]MeterModel, error) {
+	return service.ListByWellIDFunc(wellID)
 }
 
 // Create Create new
