@@ -46,10 +46,10 @@ func TestDefaultMeterServiceGetFunc(t *testing.T) {
 			PayloadModelType: reflect.TypeOf(MeterModel{}),
 		})
 
-	defaultMeterService.GetFunc = func(ID uint) (*MeterModel, error) {
+	defaultMeterService.GetFunc = func(wellID uint, ID uint) (*MeterModel, error) {
 		return &MeterModel{DefaultModelBase: &DefaultModelBase{ID: ID}}, nil
 	}
-	returnedModel, err := defaultMeterService.Get(3333)
+	returnedModel, err := defaultMeterService.Get(1, 3333)
 	assert.Nil(t, err, "Error should be nil.")
 	assert.Equal(t, uint(3333), returnedModel.ID)
 }

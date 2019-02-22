@@ -1,7 +1,11 @@
 package hydros
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+	"io/ioutil"
+	"net/http"
 	"reflect"
 	"time"
 )
@@ -21,7 +25,7 @@ func NewMeterService(client *Client) MeterService {
 type MeterService interface {
 	Service
 
-	Get(id uint) (*MeterModel, error)
+	Get(wellID uint, ID uint) (*MeterModel, error)
 	Create(model *MeterModel) (*MeterModel, error)
 	Update(model *MeterModel) (*MeterModel, error)
 	Decommission(id uint, decommissionTime time.Time) (*MeterModel, error)
@@ -30,7 +34,7 @@ type MeterService interface {
 // DefaultMeterService default meter service struct that contains backing functions
 type DefaultMeterService struct {
 	*DefaultService
-	GetFunc          func(id uint) (*MeterModel, error)
+	GetFunc          func(wellID uint, ID uint) (*MeterModel, error)
 	CreateFunc       func(model *MeterModel) (*MeterModel, error)
 	UpdateFunc       func(model *MeterModel) (*MeterModel, error)
 	DecommissionFunc func(id uint, decommissionTime time.Time) (*MeterModel, error)
@@ -41,8 +45,39 @@ func (service *DefaultMeterService) Init(spec *ServiceSpec) *DefaultMeterService
 	service.Spec = spec
 
 	// Define Get backing function
-	service.GetFunc = func(id uint) (*MeterModel, error) {
-		return nil, errors.New("not implemented")
+	service.GetFunc = func(wellID uint, ID uint) (*MeterModel, error) {
+		uri := fmt.Sprintf("%s/wells/%d/%s/%d.json", service.Spec.Client.URL.String(), wellID, service.Spec.ServiceName, ID)
+		req, err := http.NewRequest("GET", uri, nil)
+		headers := service.Spec.Client.CreateHeadersFunc()
+		for h := 0; h < len(headers); h++ {
+			req.Header.Add(headers[h].Key, headers[h].Value)
+		}
+
+		resp, err := service.Spec.Client.HTTPClient.Do(req)
+		if err != nil {
+			return nil, err
+		}
+
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		if resp.StatusCode != 200 {
+			var errorResponse ErrorResponse
+			err = json.Unmarshal(bodyBytes, &errorResponse)
+			if err == nil && errorResponse.Message != "" {
+				return nil, fmt.Errorf("%s: %s", errorResponse.Message, errorResponse.Description)
+			}
+			return nil, fmt.Errorf("%d error: %s", resp.StatusCode, string(bodyBytes))
+		}
+
+		var meter MeterModel
+		err = json.Unmarshal(bodyBytes, &meter)
+		if err != nil {
+			return nil, err
+		}
+		return meter.Init(service.Spec), nil
 	}
 
 	// Define Create backing function
@@ -64,8 +99,8 @@ func (service *DefaultMeterService) Init(spec *ServiceSpec) *DefaultMeterService
 }
 
 // Get Get payload object by id
-func (service *DefaultMeterService) Get(id uint) (*MeterModel, error) {
-	return service.GetFunc(id)
+func (service *DefaultMeterService) Get(wellID uint, ID uint) (*MeterModel, error) {
+	return service.GetFunc(wellID, ID)
 }
 
 // Create Create new
