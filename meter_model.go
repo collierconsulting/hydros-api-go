@@ -13,7 +13,7 @@ type MeterModel struct {
 	Unit            string      `json:"unit"`
 	Active          bool        `json:"active"`
 	DateInService   time.Time   `json:"dateInService"`
-	DecomissionDate *time.Time   `json:"decomissionDate,omitempty"`
+	DecomissionDate *time.Time  `json:"decomissionDate,omitempty"`
 	Wells           []WellModel `json:"wells"`
 }
 
