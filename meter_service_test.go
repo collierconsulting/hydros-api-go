@@ -98,7 +98,7 @@ func TestDefaultMeterServiceDecommissionFunc(t *testing.T) {
 		})
 
 	defaultMeterService.DecommissionFunc = func(id uint, decommissionDate time.Time) (*MeterModel, error) {
-		model := MeterModel{DefaultModelBase: &DefaultModelBase{ID: id}, DecomissionDate: decommissionDate}
+		model := MeterModel{DefaultModelBase: &DefaultModelBase{ID: id}, DecomissionDate: &decommissionDate}
 		return &model, nil
 	}
 
@@ -107,5 +107,5 @@ func TestDefaultMeterServiceDecommissionFunc(t *testing.T) {
 	returnedModel, err := defaultMeterService.Decommission(2, decomTime)
 	assert.Nil(t, err, "Error should be nil.")
 	assert.Equal(t, uint(2), returnedModel.ID)
-	assert.Equal(t, decomTime, returnedModel.DecomissionDate)
+	assert.Equal(t, &decomTime, returnedModel.DecomissionDate)
 }
