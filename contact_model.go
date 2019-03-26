@@ -16,6 +16,7 @@ type ContactModel struct {
 	PostalCode     null.String                `json:"postalCode"`
 	Classification null.String                `json:"classification"`
 	PhoneNumbers   []*ContactPhoneNumberModel `json:"phoneNumbers,omitempty"`
+	Verified       bool                       `json:"verified"`
 }
 
 // ContactPhoneNumberModel phone number model for contact association
