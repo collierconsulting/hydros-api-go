@@ -44,6 +44,7 @@ func NewClient(options ...ClientOptionFunc) (*Client, error) {
 	client.Driller = NewDrillerService(client)
 	client.History = NewHistoryService(client)
 	client.Meter = NewMeterService(client)
+	client.MeterReading = NewMeterReadingService(client)
 	client.Permit = NewPermitService(client)
 	client.Well = NewWellService(client)
 
@@ -60,6 +61,7 @@ type Client struct {
 	Driller           DrillerService
 	History           HistoryService
 	Meter             MeterService
+	MeterReading      MeterReadingService
 	Permit            PermitService
 	Well              WellService
 }

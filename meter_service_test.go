@@ -54,7 +54,7 @@ func TestDefaultMeterServiceGetFunc(t *testing.T) {
 	assert.Equal(t, uint(3333), returnedModel.ID)
 }
 
-func TestDefaultMEterServiceListByWellIDFunc(t *testing.T) {
+func TestDefaultMeterServiceListByWellIDFunc(t *testing.T) {
 
 	defaultMeterService := (&DefaultMeterService{DefaultService: &DefaultService{}}).
 		Init(&ServiceSpec{
