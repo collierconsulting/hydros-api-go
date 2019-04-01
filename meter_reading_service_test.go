@@ -53,7 +53,6 @@ func TestDefaultMeterReadingServiceGetProductionByWellFunc(t *testing.T) {
 	assert.Equal(t, uint(100), returnedModels[0].MeterID)
 }
 
-
 func TestDefaultMeterReadingServiceGetProductionByWellAndMeterFunc(t *testing.T) {
 
 	defaultMeterReadingService := (&DefaultMeterReadingService{DefaultService: &DefaultService{}}).
