@@ -71,7 +71,7 @@ func (model *PermitModel) Init(spec *ServiceSpec) *PermitModel {
 				params.Add("fromDate", fromDate.Format("2006-01-02T15:04:05-0700"))
 			}
 			if toDate != nil {
-				params.Add("fromDate", fromDate.Format("2006-01-02T15:04:05-0700"))
+				params.Add("toDate", fromDate.Format("2006-01-02T15:04:05-0700"))
 			}
 			params.Add("estimateBounds", fmt.Sprint(estimateBounds))
 

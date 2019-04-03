@@ -83,6 +83,7 @@ type WellModel struct {
 
 	_Update        func(model *WellModel, JSONMergePatch []byte) (*WellModel, error)
 	_Save          func(model *WellModel) (*WellModel, error)
+	_Permits       func(model *WellModel) ([]*PermitModel, error)
 	_Delete        func(model *WellModel) error
 	_TriggerUpdate func(model *WellModel) (*WellModel, error)
 }
@@ -102,6 +103,49 @@ func (model *WellModel) Init(spec *ServiceSpec) *WellModel {
 	} else {
 		model._Save = func(model *WellModel) (*WellModel, error) {
 			return nil, errors.New("not implemented")
+		}
+	}
+
+	if serviceMock, ok := spec.ModelServiceCallMocks["Permits"]; ok {
+		model._Permits = serviceMock.MockFunc.(func(model *WellModel) ([]*PermitModel, error))
+	} else {
+		model._Permits = func(model *WellModel) ([]*PermitModel, error) {
+			uri := fmt.Sprintf("%s/%s/%d/permits.json", model.Spec.Client.URL.String(), model.Spec.ServiceName, model.ID)
+			req, err := http.NewRequest("GET", uri, nil)
+			headers := model.Spec.Client.CreateHeadersFunc()
+			for h := 0; h < len(headers); h++ {
+				req.Header.Add(headers[h].Key, headers[h].Value)
+			}
+
+			resp, err := model.Spec.Client.HTTPClient.Do(req)
+			if err != nil {
+				return nil, err
+			}
+
+			bodyBytes, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+
+			if resp.StatusCode != 200 {
+				var errorResponse ErrorResponse
+				err = json.Unmarshal(bodyBytes, &errorResponse)
+				if err == nil && errorResponse.Message != "" {
+					return nil, fmt.Errorf("%s: %s", errorResponse.Message, errorResponse.Description)
+				}
+				return nil, fmt.Errorf("%d error: %s", resp.StatusCode, string(bodyBytes))
+			}
+
+			var permits []*PermitModel
+			err = json.Unmarshal(bodyBytes, &permits)
+			if err != nil {
+				return nil, err
+			}
+			initializedPermits := make([]*PermitModel, len(permits))
+			for i, permit := range permits {
+				initializedPermits[i] = permit.Init(spec.Client.Permit._ServiceSpec())
+			}
+			return initializedPermits, nil
 		}
 	}
 
@@ -182,6 +226,11 @@ func (model *WellModel) TriggerUpdate() (*WellModel, error) {
 // Save changed model
 func (model *WellModel) Save() (*WellModel, error) {
 	return model._Save(model)
+}
+
+// Permits fetch permits
+func (model *WellModel) Permits() ([]*PermitModel, error) {
+	return model._Permits(model)
 }
 
 // Delete model
