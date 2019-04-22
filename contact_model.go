@@ -9,8 +9,8 @@ type ContactModel struct {
 	LastName       null.String                `json:"lastName"`
 	CompanyName    null.String                `json:"companyName"`
 	Email          null.String                `json:"email"`
-	Address1       null.String                `json:"address1"`
-	Address2       null.String                `json:"address2"`
+	Address1       null.String                `json:"streetAddress1"`
+	Address2       null.String                `json:"streetAddress2"`
 	City           null.String                `json:"city"`
 	State          null.String                `json:"state"`
 	PostalCode     null.String                `json:"postalCode"`
