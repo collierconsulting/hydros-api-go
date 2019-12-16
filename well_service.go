@@ -124,7 +124,12 @@ func (service *DefaultWellService) Init(spec *ServiceSpec) *DefaultWellService {
 		if err != nil {
 			return nil, err
 		}
-		return wells, nil
+
+		initializedWells := make([]WellModel, len(wells))
+		for i := 0; i < len(wells); i++ {
+			initializedWells[i] = *wells[i].Init(spec)
+		}
+		return initializedWells, nil
 	}
 
 	// Define Count backing function
