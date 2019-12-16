@@ -91,7 +91,7 @@ func (service *DefaultWellService) Init(spec *ServiceSpec) *DefaultWellService {
 	service.GetWellsByIDsFunc = func(ids []uint) ([]WellModel, error) {
 		wellIDsStr := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(ids)), ","), "[]")
 
-		jsonStr := []byte(fmt.Sprintf(`{"ids":%s}`, wellIDsStr))
+		jsonStr := []byte(fmt.Sprintf(`{"ids":[%s]}`, wellIDsStr))
 
 		uri := fmt.Sprintf("%s/%s/wellsByIDs.json", service.Spec.Client.URL.String(), service.Spec.ServiceName)
 		req, err := http.NewRequest("POST", uri, bytes.NewBuffer(jsonStr))
