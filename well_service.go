@@ -1,6 +1,7 @@
 package hydros
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -27,6 +28,7 @@ type WellService interface {
 	Service
 
 	Get(ID uint) (*WellModel, error)
+	GetWellsByIDs(ids []uint) ([]WellModel, error)
 	Count() (int, error)
 	List(from int, size int, sort []Sort, ids []uint) ([]*WellModel, error)
 	Search(query string, filters []string, from int, size int, sort []Sort) (*WellSearchResults, error)
@@ -36,11 +38,12 @@ type WellService interface {
 // DefaultWellService default well service struct that contains backing functions
 type DefaultWellService struct {
 	*DefaultService
-	GetFunc    func(ID uint) (*WellModel, error)
-	CountFunc  func() (int, error)
-	ListFunc   func(from int, size int, sort []Sort, ids []uint) ([]*WellModel, error)
-	SearchFunc func(query string, filters []string, from int, size int, sort []Sort) (*WellSearchResults, error)
-	CreateFunc func(model *WellModel) (*WellModel, error)
+	GetFunc           func(ID uint) (*WellModel, error)
+	GetWellsByIDsFunc func(ids []uint) ([]WellModel, error)
+	CountFunc         func() (int, error)
+	ListFunc          func(from int, size int, sort []Sort, ids []uint) ([]*WellModel, error)
+	SearchFunc        func(query string, filters []string, from int, size int, sort []Sort) (*WellSearchResults, error)
+	CreateFunc        func(model *WellModel) (*WellModel, error)
 }
 
 // Init Initializes spec and default backing functions for service
@@ -82,6 +85,46 @@ func (service *DefaultWellService) Init(spec *ServiceSpec) *DefaultWellService {
 			return nil, err
 		}
 		return &well, nil
+	}
+
+	// Define GetWellsByIDs function
+	service.GetWellsByIDsFunc = func(ids []uint) ([]WellModel, error) {
+		wellIDsStr := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(ids)), ","), "[]")
+
+		jsonStr := []byte(fmt.Sprintf(`{"ids":%s}`, wellIDsStr))
+
+		uri := fmt.Sprintf("%s/%s/wellsByIDs.json", service.Spec.Client.URL.String(), service.Spec.ServiceName)
+		req, err := http.NewRequest("POST", uri, bytes.NewBuffer(jsonStr))
+		headers := service.Spec.Client.CreateHeadersFunc()
+		for h := 0; h < len(headers); h++ {
+			req.Header.Add(headers[h].Key, headers[h].Value)
+		}
+
+		resp, err := service.Spec.Client.HTTPClient.Do(req)
+		if err != nil {
+			return nil, err
+		}
+
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		if resp.StatusCode != 200 {
+			var errorResponse ErrorResponse
+			err = json.Unmarshal(bodyBytes, &errorResponse)
+			if err == nil && errorResponse.Message != "" {
+				return nil, fmt.Errorf("%s: %s", errorResponse.Message, errorResponse.Description)
+			}
+			return nil, fmt.Errorf("%d error: %s", resp.StatusCode, string(bodyBytes))
+		}
+
+		var wells []WellModel
+		err = json.Unmarshal(bodyBytes, &wells)
+		if err != nil {
+			return nil, err
+		}
+		return wells, nil
 	}
 
 	// Define Count backing function
@@ -164,6 +207,11 @@ func (service *DefaultWellService) Init(spec *ServiceSpec) *DefaultWellService {
 // Get Get payload object by id
 func (service *DefaultWellService) Get(ID uint) (*WellModel, error) {
 	return service.GetFunc(ID)
+}
+
+// Get Get wells by ids
+func (service *DefaultWellService) GetWellsByIDs(ids []uint) ([]WellModel, error) {
+	return service.GetWellsByIDsFunc(ids)
 }
 
 // List List objects for service
