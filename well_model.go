@@ -153,7 +153,38 @@ func (model *WellModel) Init(spec *ServiceSpec) *WellModel {
 		model._Update = serviceMock.MockFunc.(func(model *WellModel, JSONMergePatch []byte) (*WellModel, error))
 	} else {
 		model._Update = func(model *WellModel, JSONMergePatch []byte) (*WellModel, error) {
-			return nil, errors.New("not implemented")
+			uri := fmt.Sprintf("%s/%s/%d.json", model.Spec.Client.URL.String(), model.Spec.ServiceName, model.ID)
+			req, err := http.NewRequest("PATCH", uri, bytes.NewBuffer(JSONMergePatch))
+			headers := model.Spec.Client.CreateHeadersFunc()
+			for h := 0; h < len(headers); h++ {
+				req.Header.Add(headers[h].Key, headers[h].Value)
+			}
+
+			resp, err := model.Spec.Client.HTTPClient.Do(req)
+			if err != nil {
+				return nil, err
+			}
+
+			bodyBytes, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+
+			if resp.StatusCode != http.StatusAccepted {
+				var errorResponse ErrorResponse
+				err = json.Unmarshal(bodyBytes, &errorResponse)
+				if err == nil && errorResponse.Message != "" {
+					return nil, fmt.Errorf("%s: %s", errorResponse.Message, errorResponse.Description)
+				}
+				return nil, fmt.Errorf("%d error: %s", resp.StatusCode, string(bodyBytes))
+			}
+
+			var updatedWell WellModel
+			err = json.Unmarshal(bodyBytes, &updatedWell)
+			if err != nil {
+				return nil, err
+			}
+			return updatedWell.Init(model.Spec), nil
 		}
 	}
 
