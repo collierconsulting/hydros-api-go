@@ -16,6 +16,8 @@ func TestDefaultWellService_Init(t *testing.T) {
 	assert.Equal(t, reflect.TypeOf(defaultWellService.CreateFunc).Kind(), reflect.Func, "CreateFunc should be func")
 	assert.NotNil(t, defaultWellService.GetFunc, "GetFunc should not be null")
 	assert.Equal(t, reflect.TypeOf(defaultWellService.GetFunc).Kind(), reflect.Func, "GetFunc should be func")
+	assert.NotNil(t, defaultWellService.GetFunc, "GetWellsByIDsFunc should not be null")
+	assert.Equal(t, reflect.TypeOf(defaultWellService.GetWellsByIDsFunc).Kind(), reflect.Func, "GetWellsByIDsFunc should be func")
 	assert.NotNil(t, defaultWellService.CountFunc, "CountFunc should not be null")
 	assert.Equal(t, reflect.TypeOf(defaultWellService.CountFunc).Kind(), reflect.Func, "CountFunc should be func")
 	assert.NotNil(t, defaultWellService.ListFunc, "ListFunc should not be null")
@@ -63,6 +65,26 @@ func TestDefaultWellServiceGetFunc(t *testing.T) {
 	returnedModel, err := defaultWellService.Get(2718)
 	assert.Nil(t, err, "Error should be nil.")
 	assert.Equal(t, uint(2718), returnedModel.ID)
+}
+
+func TestDefaultWellServiceGetWellsByIDsFunc(t *testing.T) {
+
+	defaultWellService := (&DefaultWellService{DefaultService: &DefaultService{}}).
+		Init(&ServiceSpec{
+			ServiceName:      "test",
+			PayloadModelType: reflect.TypeOf([]WellModel{}),
+		})
+
+	defaultWellService.GetWellsByIDsFunc = func(ids []uint) ([]WellModel, error) {
+		list := make([]WellModel, 2)
+		list[0] = WellModel{DefaultModelBase: &DefaultModelBase{ID: 235711}}
+		list[1] = WellModel{DefaultModelBase: &DefaultModelBase{ID: 235712}}
+		return list, nil
+	}
+	returnedModels, err := defaultWellService.GetWellsByIDs([]uint{235711, 235712})
+	assert.Nil(t, err, "Error should be nil.")
+	assert.Equal(t, uint(235711), returnedModels[0].ID)
+	assert.Equal(t, uint(235712), returnedModels[1].ID)
 }
 
 func TestDefaultWellServiceListFunc(t *testing.T) {
