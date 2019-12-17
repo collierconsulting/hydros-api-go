@@ -84,7 +84,9 @@ func (service *DefaultWellService) Init(spec *ServiceSpec) *DefaultWellService {
 		if err != nil {
 			return nil, err
 		}
-		return &well, nil
+
+		initializedWell := well.Init(spec)
+		return initializedWell, nil
 	}
 
 	// Define GetWellsByIDs function
