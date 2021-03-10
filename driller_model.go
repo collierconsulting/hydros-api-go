@@ -9,7 +9,7 @@ import (
 type DrillerModel struct {
 	*DefaultModelBase
 	LicenseNumber          null.String         `json:"licenseNumber"`
-	LicenseExpirationDate  null.Time           `json:"licenseExpirationDate"`
+	LicenseExpirationDate  null.String         `json:"licenseExpirationDate"`
 	LicenseIssuerTerritory null.String         `json:"licenseIssuerTerritory"`
 	CompanyName            null.String         `json:"companyName"`
 	FirstName              null.String         `json:"firstName"`

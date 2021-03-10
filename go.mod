@@ -1,5 +1,7 @@
 module github.com/collierconsulting/hydros-api-go
 
+go 1.15
+
 require (
 	cloud.google.com/go v0.49.0 // indirect
 	cloud.google.com/go/bigquery v1.3.0 // indirect
@@ -22,7 +24,7 @@ require (
 	github.com/gorilla/mux v1.7.3 // indirect
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/jcmturner/gofork v1.0.0 // indirect
-	github.com/jinzhu/gorm v1.9.11
+	github.com/jinzhu/gorm v1.9.16
 	github.com/jinzhu/now v1.1.1 // indirect
 	github.com/json-iterator/go v1.1.8 // indirect
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect
@@ -30,7 +32,7 @@ require (
 	github.com/klauspost/compress v1.9.4 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/pty v1.1.8 // indirect
-	github.com/lib/pq v1.2.0 // indirect
+	github.com/lib/pq v1.10.0 // indirect
 	github.com/mattn/go-sqlite3 v2.0.1+incompatible // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
@@ -54,9 +56,7 @@ require (
 	golang.org/x/image v0.0.0-20191214001246-9130b4cfad52 // indirect
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
 	golang.org/x/mobile v0.0.0-20191210151939-1a1fef82734d // indirect
-	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 // indirect
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6 // indirect
-	golang.org/x/sys v0.0.0-20191210023423-ac6580df4449 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/tools v0.0.0-20191216052735-49a3e744a425 // indirect
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 // indirect
@@ -64,7 +64,7 @@ require (
 	google.golang.org/genproto v0.0.0-20191206224255-0243a4be9c8f // indirect
 	google.golang.org/grpc v1.25.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
-	gopkg.in/guregu/null.v3 v3.4.0
+	gopkg.in/guregu/null.v3 v3.5.0
 	gopkg.in/jcmturner/gokrb5.v7 v7.3.0 // indirect
 	gopkg.in/yaml.v2 v2.2.7 // indirect
 )
